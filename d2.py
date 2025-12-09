@@ -15,7 +15,8 @@ They've even checked most of the product ID ranges already; they only have a few
 
 The ranges are separated by commas (,); each range gives its first ID and last ID separated by a dash (-).
 
-Since the young Elf was just doing silly patterns, you can find the invalid IDs by looking for any ID which is made only of some sequence of digits repeated twice. So, 55 (5 twice), 6464 (64 twice), and 123123 (123 twice) would all be invalid IDs.
+Since the young Elf was just doing silly patterns, you can find the invalid IDs by looking for any ID which is made only
+of some sequence of digits repeated twice. So, 55 (5 twice), 6464 (64 twice), and 123123 (123 twice) would all be invalid IDs.
 
 None of the numbers have leading zeroes; 0101 isn't an ID at all. (101 is a valid ID that you would ignore.)
 
@@ -34,3 +35,33 @@ Adding up all the invalid IDs in this example produces 1227775554.
 
 What do you get if you add up all of the invalid IDs?
 """
+
+def main():
+    ip = open("input/2.txt").read().strip().split(",")
+    # ip = ['11-22', '95-115', '998-1012', '1188511880-1188511890', '222220-222224', '1698522-1698528', '446443-446449', '38593856-38593862']
+    ip = [tuple(map(str, x.split("-"))) for x in ip]
+
+    ans = 0
+    for st, e in ip:
+        # end < 10 OR both start, end have same odd len + equal length
+        if (len(e) < 2 or
+                (len(st) % 2 != 0 and len(e) % 2 != 0 and len(st) == len(e))):
+            continue
+        int_st = int(st)
+        int_end = int(e)
+
+        start = int(st[:len(st)//2]) if int_st > 9 else 1
+        end = max(int(e[len(e)//2:]), int(e[:len(e)//2]))  # cover cases like 711089-830332 where 2nd half of end is < first half of start
+        for i in range(start, end + 1):
+            num = int(str(i) * 2)
+            if num <= int_end:
+                if num >= int_st:
+                    ans += num
+            else: break
+    return ans
+
+
+if __name__ == "__main__":
+    print(main())
+# 385883398
+# 385883398
