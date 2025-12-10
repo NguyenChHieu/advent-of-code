@@ -36,6 +36,53 @@ Adding up all the invalid IDs in this example produces 1227775554.
 What do you get if you add up all of the invalid IDs?
 """
 
+# def main():
+#     ip = open("input/2.txt").read().strip().split(",")
+#     # ip = ['11-22', '95-115', '998-1012', '1188511880-1188511890', '222220-222224', '1698522-1698528', '446443-446449', '38593856-38593862']
+#     ip = [tuple(map(str, x.split("-"))) for x in ip]
+#
+#     ans = 0
+#     for st, e in ip:
+#         # end < 10 OR both start, end have same odd len + equal length
+#         if (len(e) < 2 or
+#                 (len(st) % 2 != 0 and len(e) % 2 != 0 and len(st) == len(e))):
+#             continue
+#         int_st = int(st)
+#         int_end = int(e)
+#
+#         start = int(st[:len(st)//2]) if int_st > 9 else 1
+#         end = max(int(e[len(e)//2:]), int(e[:len(e)//2]))  # cover cases like 711089-830332 where 2nd half of end is < first half of start
+#         for i in range(start, end + 1):
+#             num = int(str(i) * 2)
+#             if num <= int_end:
+#                 if num >= int_st:
+#                     ans += num
+#             else: break
+#     return ans
+
+"""
+--- Part Two ---
+The clerk quickly discovers that there are still invalid IDs in the ranges in your list. Maybe the young Elf was doing other silly patterns as well?
+
+Now, an ID is invalid if it is made only of some sequence of digits repeated at least twice. So, 12341234 (1234 two times), 123123123 (123 three times), 1212121212 (12 five times), and 1111111 (1 seven times) are all invalid IDs.
+
+From the same example as before:
+
+11-22 still has two invalid IDs, 11 and 22.
+95-115 now has two invalid IDs, 99 and 111.
+998-1012 now has two invalid IDs, 999 and 1010.
+1188511880-1188511890 still has one invalid ID, 1188511885.
+222220-222224 still has one invalid ID, 222222.
+1698522-1698528 still contains no invalid IDs.
+446443-446449 still has one invalid ID, 446446.
+38593856-38593862 still has one invalid ID, 38593859.
+565653-565659 now has one invalid ID, 565656.
+824824821-824824827 now has one invalid ID, 824824824.
+2121212118-2121212124 now has one invalid ID, 2121212121.
+Adding up all the invalid IDs in this example produces 4174379265.
+
+What do you get if you add up all of the invalid IDs using these new rules?
+"""
 def main():
     ip = open("input/2.txt").read().strip().split(",")
     # ip = ['11-22', '95-115', '998-1012', '1188511880-1188511890', '222220-222224', '1698522-1698528', '446443-446449', '38593856-38593862']
@@ -43,25 +90,22 @@ def main():
 
     ans = 0
     for st, e in ip:
-        # end < 10 OR both start, end have same odd len + equal length
-        if (len(e) < 2 or
-                (len(st) % 2 != 0 and len(e) % 2 != 0 and len(st) == len(e))):
+        # end < 10
+        if len(e) < 2:
             continue
         int_st = int(st)
         int_end = int(e)
 
-        start = int(st[:len(st)//2]) if int_st > 9 else 1
-        end = max(int(e[len(e)//2:]), int(e[:len(e)//2]))  # cover cases like 711089-830332 where 2nd half of end is < first half of start
-        for i in range(start, end + 1):
-            num = int(str(i) * 2)
-            if num <= int_end:
-                if num >= int_st:
-                    ans += num
-            else: break
+        for num in range(int_st, int_end + 1):
+            s = str(num)
+            # check every pattern of length 1->length s//2
+            for l in range(1, len(s)//2 + 1):
+                if len(s) % l == 0:
+                    if s == s[:l] * (len(s) // l):
+                        ans += num
+                        break
     return ans
 
 
 if __name__ == "__main__":
     print(main())
-# 385883398
-# 385883398
