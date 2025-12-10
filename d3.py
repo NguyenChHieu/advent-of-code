@@ -26,3 +26,25 @@ The total output joltage is the sum of the maximum joltage from each bank, so in
 
 There are many batteries in front of you. Find the maximum joltage possible from each bank; what is the total output joltage?
 """
+from sortedcontainers import SortedDict
+def main():
+    ip = open("input/3.txt").read().strip().split("\n")
+    # ip = ['987654321111111', '811111111111119', '234234234234278', '818181911112111']
+    ans = 0
+    for line in ip:
+        mx = 0
+        sorted_d = SortedDict()
+        for ch in line[1:]:
+            sorted_d[int(ch)] = sorted_d.get(int(ch), 0) + 1
+        for i in range(len(line)-1):   # no 0
+            mx = max(mx, int(line[i]) * 10 + sorted_d.peekitem(-1)[0])
+            sorted_d[int(line[i+1])] -= 1
+            if sorted_d[int(line[i+1])] == 0:
+                del sorted_d[int(line[i+1])]
+        ans += mx
+    return ans
+# O(n*mlog(10)) n = number of lines, m = length of each line, log(10) as there are only 10 possible digits
+
+
+if __name__ == "__main__":
+    print(main())
