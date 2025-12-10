@@ -26,25 +26,124 @@ The total output joltage is the sum of the maximum joltage from each bank, so in
 
 There are many batteries in front of you. Find the maximum joltage possible from each bank; what is the total output joltage?
 """
-from sortedcontainers import SortedDict
+# from sortedcontainers import SortedDict
+# def main():
+#     ip = open("input/3.txt").read().strip().split("\n")
+#     # ip = ['987654321111111', '811111111111119', '234234234234278', '818181911112111']
+#     ans = 0
+#     for line in ip:
+#         mx = 0
+#         sorted_d = SortedDict()
+#         for ch in line[1:]:
+#             sorted_d[int(ch)] = sorted_d.get(int(ch), 0) + 1
+#         for i in range(len(line)-1):   # no 0
+#             mx = max(mx, int(line[i]) * 10 + sorted_d.peekitem(-1)[0])
+#             sorted_d[int(line[i+1])] -= 1
+#             if sorted_d[int(line[i+1])] == 0:
+#                 del sorted_d[int(line[i+1])]
+#         ans += mx
+#     return ans
+# O(n*mlog(10)) n = number of lines, m = length of each line, log(10) as there are only 10 possible digits
+
+"""
+--- Part Two ---
+The escalator doesn't move. The Elf explains that it probably needs more joltage to overcome the static friction of the system and hits the big red "joltage limit safety override" button. You lose count of the number of times she needs to confirm "yes, I'm sure" and decorate the lobby a bit while you wait.
+
+Now, you need to make the largest joltage by turning on exactly twelve batteries within each bank.
+
+The joltage output for the bank is still the number formed by the digits of the batteries you've turned on; the only difference is that now there will be 12 digits in each bank's joltage output instead of two.
+
+Consider again the example from before:
+
+987654321111111
+811111111111119
+234234234234278
+818181911112111
+Now, the joltages are much larger:
+
+In 987654321111111, the largest joltage can be found by turning on everything except some 1s at the end to produce 987654321111.
+In the digit sequence 811111111111119, the largest joltage can be found by turning on everything except some 1s, producing 811111111119.
+In 234234234234278, the largest joltage can be found by turning on everything except a 2 battery, a 3 battery, and another 2 battery near the start to produce 434234234278.
+In 818181911112111, the joltage 888911112111 is produced by turning on everything except some 1s near the front.
+The total output joltage is now much larger: 987654321111 + 811111111119 + 434234234278 + 888911112111 = 3121910778619.
+
+What is the new total output joltage?
+"""
+
+# too slow
+# def main():
+#     ip = open("input/3.txt").read().strip().split("\n")
+#     # ip = ['987654321111111', '811111111111119', '234234234234278', '818181911112111']
+#     ans = 0
+#     max_found = 0
+#     TARGET = 12
+#
+#     def backtrack(curr, i, string):
+#         nonlocal max_found
+#         if len(curr) == TARGET:
+#             max_found = max(int("".join(curr)), max_found)
+#             return
+#
+#         # number of chars needed to form < number of chars remaining
+#         if TARGET - len(curr) > len(string) - i:
+#             return
+#
+#         for j in range(i, len(string)):
+#             curr.append(string[j])
+#             backtrack(curr, j + 1, string)
+#             curr.pop()
+#
+#     for line in ip:
+#         max_found = 0
+#         backtrack([], 0, line)
+#         ans += max_found
+#     return ans
+
 def main():
     ip = open("input/3.txt").read().strip().split("\n")
     # ip = ['987654321111111', '811111111111119', '234234234234278', '818181911112111']
     ans = 0
-    for line in ip:
-        mx = 0
-        sorted_d = SortedDict()
-        for ch in line[1:]:
-            sorted_d[int(ch)] = sorted_d.get(int(ch), 0) + 1
-        for i in range(len(line)-1):   # no 0
-            mx = max(mx, int(line[i]) * 10 + sorted_d.peekitem(-1)[0])
-            sorted_d[int(line[i+1])] -= 1
-            if sorted_d[int(line[i+1])] == 0:
-                del sorted_d[int(line[i+1])]
-        ans += mx
-    return ans
-# O(n*mlog(10)) n = number of lines, m = length of each line, log(10) as there are only 10 possible digits
+    TARGET = 12
 
+    for line in ip:
+        delete_rem = len(line) - TARGET
+        st = []
+
+        for ch in line:
+            while st and st[-1] < ch and delete_rem > 0:
+                st.pop()
+                delete_rem -= 1
+            st.append(ch)
+
+        if delete_rem > 0:
+            st = st[:-delete_rem]
+
+        ans += int("".join(st))
+    return ans
+
+
+"""
+Approach:
+Keep a monotonic decreasing stack while deleting exactly k = n − 12 digits.
+For each digit, pop from the stack while:
+- the top is smaller (hurts the final number), and
+- you still have deletions left (k > 0).
+Push the current digit.
+If deletions remain after processing, remove from the end.
+This produces the lexicographically largest subsequence of length 12.
+
+Proof:
+Exchange argument:
+If a smaller digit appears before a bigger digit, swapping them increases the final number.
+
+Optimality of deletions:
+You must delete exactly k digits.
+The greedy rule always deletes the earliest “harmful” smaller digits, 
+which maximizes the prefix - the most significant part of the number.
+
+Feasibility:
+Because pops are limited by k, and leftover deletions are handled at the end, the result always has exactly 12 digits.
+"""
 
 if __name__ == "__main__":
     print(main())
