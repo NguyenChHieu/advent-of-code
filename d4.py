@@ -44,7 +44,6 @@ def main():
 
     rows = len(grid)
     cols = len(grid[0])
-    accessible_count = 0
 
     directions = [(-1, -1), (-1, 0), (-1, 1),
                   (0, -1),          (0, 1),
