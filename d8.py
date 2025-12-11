@@ -50,8 +50,153 @@ After making the ten shortest connections, there are 11 circuits: one circuit wh
 
 Your list contains many junction boxes; connect together the 1000 pairs of junction boxes which are closest together. Afterward, what do you get if you multiply together the sizes of the three largest circuits?
 """
+from collections import deque
+from math import sqrt
+from heapq import *
+
+
+def dist2(p1, p2):
+    return (p1[0]-p2[0])**2 + (p1[1]-p2[1])**2 + (p1[2]-p2[2])**2
+
+
+# def main():
+#     # find max size connected component 3d
+#
+# #     test_ip = """162,817,812
+# # 57,618,57
+# # 906,360,560
+# # 592,479,940
+# # 352,342,300
+# # 466,668,158
+# # 542,29,236
+# # 431,825,988
+# # 739,650,466
+# # 52,470,668
+# # 216,146,977
+# # 819,987,18
+# # 117,168,530
+# # 805,96,715
+# # 346,949,466
+# # 970,615,88
+# # 941,993,340
+# # 862,61,35
+# # 984,92,344
+# # 425,690,689"""
+# #     ip = [tuple(map(int, line.split(","))) for line in test_ip.split("\n")]
+#
+#     ip = [tuple(map(int, line.split(","))) for line in open("input/8.txt").read().splitlines()]
+#     idx = 1
+#     node_to_comp = {}
+#     comp_to_node = {}
+#     h = []
+#     for i in range(len(ip) - 1):
+#         for j in range(i + 1, len(ip)):
+#             h.append((dist2(ip[i], ip[j]), i, j))
+#     heapify(h)
+#
+#     # pairs_done = 10
+#     pairs_done = 1000
+#     while pairs_done > 0:
+#         _, a, b = heappop(h)
+#         pairs_done -= 1
+#
+#         if a not in node_to_comp and b not in node_to_comp:
+#             node_to_comp[a] = idx
+#             node_to_comp[b] = idx
+#             comp_to_node[idx] = {a, b}
+#             idx += 1
+#         elif a not in node_to_comp:
+#             comp_idx = node_to_comp[b]
+#             node_to_comp[a] = comp_idx
+#             comp_to_node[comp_idx].add(a)
+#         elif b not in node_to_comp:
+#             comp_idx = node_to_comp[a]
+#             node_to_comp[b] = comp_idx
+#             comp_to_node[comp_idx].add(b)
+#         else:
+#             comp_a = node_to_comp[a]
+#             comp_b = node_to_comp[b]
+#             comp_large, comp_small = \
+#                 (comp_a, comp_b) if len(comp_to_node[comp_a]) > len(comp_to_node[comp_b]) \
+#                     else (comp_b, comp_a)
+#
+#             # if same component: skip
+#             if comp_large == comp_small:
+#                 continue
+#
+#             # perform merge
+#             for node in comp_to_node[comp_small]:
+#                 node_to_comp[node] = comp_large
+#
+#             comp_to_node[comp_large].update(comp_to_node[comp_small])
+#             del comp_to_node[comp_small]
+#
+#     sizes = sorted([len(comp) for comp in comp_to_node.values()])
+#     ans = 1
+#     for size in sizes[-3:]:
+#         ans *= size
+#     return ans
+
+"""
+--- Part Two ---
+The Elves were right; they definitely don't have enough extension cables. You'll need to keep connecting junction boxes together until they're all in one large circuit.
+
+Continuing the above example, the first connection which causes all of the junction boxes to form a single circuit is between the junction boxes at 216,146,977 and 117,168,530. The Elves need to know how far those junction boxes are from the wall so they can pick the right extension cable; multiplying the X coordinates of those two junction boxes (216 and 117) produces 25272.
+
+Continue connecting the closest unconnected pairs of junction boxes together until they're all in the same circuit. What do you get if you multiply together the X coordinates of the last two junction boxes you need to connect?
+"""
+
 def main():
-    ...
+    ip = [tuple(map(int, line.split(","))) for line in open("input/8.txt").read().splitlines()]
+    idx = 1
+    node_to_comp = {}
+    comp_to_node = {}
+    h = []
+    for i in range(len(ip) - 1):
+        for j in range(i + 1, len(ip)):
+            h.append((dist2(ip[i], ip[j]), i, j))
+    h = deque(sorted(h))
+
+    ans = 0
+    while h:
+        _, a, b = h.popleft()
+
+        if a not in node_to_comp and b not in node_to_comp:
+            node_to_comp[a] = idx
+            node_to_comp[b] = idx
+            comp_to_node[idx] = {a, b}
+            idx += 1
+        elif a not in node_to_comp:
+            comp_idx = node_to_comp[b]
+            node_to_comp[a] = comp_idx
+            comp_to_node[comp_idx].add(a)
+        elif b not in node_to_comp:
+            comp_idx = node_to_comp[a]
+            node_to_comp[b] = comp_idx
+            comp_to_node[comp_idx].add(b)
+        else:
+            comp_a = node_to_comp[a]
+            comp_b = node_to_comp[b]
+            comp_large, comp_small = \
+                (comp_a, comp_b) if len(comp_to_node[comp_a]) > len(comp_to_node[comp_b]) \
+                    else (comp_b, comp_a)
+
+            # if same component: skip
+            if comp_large == comp_small:
+                continue
+
+            # perform merge
+            for node in comp_to_node[comp_small]:
+                node_to_comp[node] = comp_large
+
+            comp_to_node[comp_large].update(comp_to_node[comp_small])
+            del comp_to_node[comp_small]
+
+        # ensure check cases like last node merge to the total comp
+        if len(comp_to_node) == 1 and len(node_to_comp) == len(ip):
+            ans = ip[a][0] * ip[b][0]
+            break
+    return ans
 
 
 if __name__ == '__main__':
