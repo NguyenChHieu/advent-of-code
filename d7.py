@@ -124,7 +124,6 @@ Analyze your manifold diagram. How many times will the beam be split?
 """
 from collections import deque
 
-
 # def main():
 #     ip = [line for line in open("input/7.txt").read().splitlines()]
 #
@@ -245,53 +244,50 @@ Apply the many-worlds interpretation of quantum tachyon splitting to your manifo
 
 
 def main():
+    #     ip = """.......S.......
+    # ...............
+    # .......^.......
+    # ...............
+    # ......^.^......
+    # ...............
+    # .....^.^.^.....
+    # ...............
+    # ....^.^...^....
+    # ...............
+    # ...^.^...^.^...
+    # ...............
+    # ..^...^.....^..
+    # ...............
+    # .^.^.^.^.^...^.
+    # ...............""".split("\n")
+
     ip = [line for line in open("input/7.txt").read().splitlines()]
-
-#     ip = """.......S.......
-# ...............
-# .......^.......
-# ...............
-# ......^.^......
-# ...............
-# .....^.^.^.....
-# ...............
-# ....^.^...^....
-# ...............
-# ...^.^...^.^...
-# ...............
-# ..^...^.....^..
-# ...............
-# .^.^.^.^.^...^.
-# ...............""".split("\n")
-
-    # print(ip)
+    ip = [line for line in ip if '^' in line or 'S' in line]  # remove empty lines
     r = len(ip)
     c = len(ip[0])
-    # print(r,c)
-    curr = (1, ip[0].index("S"))
-    q = deque([curr])
-    seen = {curr}
-    splitter_found = set()
-    ans = 0
-    while q:
-        row, col = q.popleft()
-        while row < r and ip[row][col] != "^":
-            row += 1
-        if row == r:
-            continue
-        if ip[row][col] == "^":
-            if (row, col) in splitter_found:
-                continue
-            splitter_found.add((row, col))
-            ans += 1
 
-            if (row, col-1) not in seen:
-                seen.add((row, col-1))
-                q.append((row, col-1))
-            if (row, col + 1) not in seen:
-                seen.add((row, col + 1))
-                q.append((row, col + 1))
-    return ans
+    # for line in ip:
+    #     print(line)
+
+    # dp[r][c]: number of ways to reach splitter
+    # dp[r][c] = dp[r+1][c-1] + dp[r+1][c+1] (bot to top)
+    # base case: last row if ele = '^' -> 2 ways else 0
+    dp = [[0] * c for _ in range(r)]
+    for col in range(c):
+        dp[-1][col] = 2 if ip[-1][col] == '^' else 1
+    for row in range(r - 2, -1, -1):
+        for col in range(c):
+            if ip[row][col] == '.':
+                dp[row][col] = dp[row + 1][col]
+                continue
+            dp[row][col] = dp[row + 1][col - 1] + dp[row + 1][col + 1]
+    return dp[0][ip[0].index('S')]
+
+    # for r,line in enumerate(dp):
+    #     for c,col in enumerate(line):
+    #         dp[r][c] = str(col) if col != 0 else '__'
+    #     print("".join(dp[r]))
+
 
 if __name__ == "__main__":
     print(main())
